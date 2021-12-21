@@ -1,5 +1,18 @@
 use std::fs;
 
+fn compare_measurements_and_print(values: &Vec<i32>) {
+    let mut increased_measurements = 0;
+
+    for (idx, val) in values.iter().enumerate() {
+        if idx > 0 && values[idx - 1] < *val {
+            increased_measurements += 1
+        }
+    }
+
+    println!("How many measurements are larger than the previous measurement?");
+    println!("{} measurements!", increased_measurements);
+}
+
 fn main() {
     let contents = fs::read_to_string("data.txt").expect("Error reading file");
     let values: Vec<i32> = contents.split("\n").map(|s| s.parse().unwrap()).collect();
@@ -16,17 +29,4 @@ fn main() {
         }
     }
     compare_measurements_and_print(&sliding_window);
-}
-
-fn compare_measurements_and_print(values: &Vec<i32>) {
-    let mut increased_measurements = 0;
-
-    for (idx, val) in values.iter().enumerate() {
-        if idx > 0 && values[idx - 1] < *val {
-            increased_measurements += 1
-        }
-    }
-
-    println!("How many measurements are larger than the previous measurement?");
-    println!("{} measurements!", increased_measurements);
 }
