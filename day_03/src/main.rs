@@ -13,7 +13,7 @@ fn calc_power_consumption(bool_array: &Vec<bool>, num_size: &usize) -> i32 {
     gamma * epsilon
 }
 
-fn calc_number_life_support(report: &Vec<&str>, num_size: &usize, look_for_common: bool) {
+fn calc_oxygen(report: &Vec<&str>, num_size: &usize) -> i32 {
     let mut temp_report: Vec<&str> = report.to_vec();
     let mut most_common_value;
 
@@ -25,23 +25,66 @@ fn calc_number_life_support(report: &Vec<&str>, num_size: &usize, look_for_commo
             .filter(|&e| e.chars().nth(n).unwrap() == '1')
             .count();
 
-        if count > report_count / 2 {
-            most_common_value = '1';
+        if count >= report_count / 2 {
+            most_common_value = '1'
         } else {
-            most_common_value = '0';
+            most_common_value = '0'
         }
 
-        if look_for_common {
-            temp_report = temp_report
-                .into_iter()
-                .filter(|&e| e.chars().nth(n).unwrap() == most_common_value)
-                .collect();
-        } else {
-            temp_report = temp_report
-                .into_iter()
-                .filter(|&e| e.chars().nth(n).unwrap() != most_common_value)
-                .collect();
+        temp_report = temp_report
+            .into_iter()
+            .filter(|&e| e.chars().nth(n).unwrap() == most_common_value)
+            .collect();
+
+        if temp_report.len() == 1 {
+            println!("{:?}", temp_report);
+            break;
         }
+    }
+
+    let mut decimal = 0;
+    for (idx, val) in temp_report.first().unwrap().chars().enumerate() {
+        if val == '1' {
+            decimal += i32::pow(2, (*num_size - (idx + 1)) as u32)
+        }
+    }
+    println!("{}", decimal);
+    decimal
+}
+
+fn calc_co2(report: &Vec<&str>, num_size: &usize) -> i32 {
+    let mut temp_report: Vec<&str> = report.to_vec();
+    let mut most_common_value;
+
+    for n in 0..*num_size {
+        let report_count = temp_report.iter().count();
+
+        let count = temp_report
+            .iter()
+            .filter(|&e| e.chars().nth(n).unwrap() == '1')
+            .count();
+
+        if count >= report_count / 2 {
+            most_common_value = '0'
+        } else {
+            most_common_value = '1'
+        }
+
+        if temp_report
+            .iter()
+            .filter(|&e| e.chars().nth(n).unwrap() == most_common_value)
+            .count()
+            == 0
+        {
+            continue;
+        }
+
+        temp_report = temp_report
+            .into_iter()
+            .filter(|&e| e.chars().nth(n).unwrap() == most_common_value)
+            .collect();
+
+        println!("{:?}", temp_report);
 
         if temp_report.len() == 1 {
             break;
@@ -49,14 +92,13 @@ fn calc_number_life_support(report: &Vec<&str>, num_size: &usize, look_for_commo
     }
 
     let mut decimal = 0;
-    for (idx, val) in temp_report.first().unwrap().() {
-        if *val == true {
-            gamma += i32::pow(2, (*num_size - (idx + 1)) as u32)
-        } else {
-            epsilon += i32::pow(2, (*num_size - (idx + 1)) as u32)
+    for (idx, val) in temp_report.first().unwrap().chars().enumerate() {
+        if val == '1' {
+            decimal += i32::pow(2, (*num_size - (idx + 1)) as u32)
         }
     }
-    gamma * epsilon
+    println!("{}", decimal);
+    decimal
 }
 
 fn main() {
@@ -67,6 +109,7 @@ fn main() {
     let num_length = report.first().unwrap().chars().count();
 
     let mut bool_array = vec![];
+    let mut my_string = String::from("");
 
     for n in 0..num_length {
         let count = report
@@ -79,8 +122,10 @@ fn main() {
 
         if count > report_length / 2 {
             bool_array.push(true);
+            my_string.push_str("1")
         } else {
             bool_array.push(false);
+            my_string.push_str("0")
         }
     }
 
@@ -89,9 +134,11 @@ fn main() {
     println!("Day 3 a)");
     println!("What is the power consumption of the submarine?");
     println!("{} units power consumption", power_consumption);
+    println!("{}", usize::from_str_radix(&my_string, 2).unwrap());
 
     println!("Day 3 b)");
-    calc_number_life_support(&report, &num_length, true);
-    let test = calc_number_life_support(&report, &num_length, false);
-    println!("{:?}", test);
+    let oxygen = calc_oxygen(&report, &num_length);
+    let co2_rating = calc_co2(&report, &num_length);
+    println!("What is the life support rating of the submarine?");
+    println!("{}", oxygen * co2_rating);
 }
